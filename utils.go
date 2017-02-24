@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os/exec"
-	"path/filepath"
 	"time"
 )
 
@@ -53,12 +52,12 @@ func SaveTempFile(b []byte) string {
 	return file.Name()
 }
 
-func SaveFile(b []byte) string {
-	file := randomFile()
-	path := filepath.Join(base_path, file)
-	ioutil.WriteFile(path, b, 0644)
-	return base_url + file
-}
+// func SaveFile(b []byte) string {
+// 	file := randomFile()
+// 	path := filepath.Join(base_path, file)
+// 	ioutil.WriteFile(path, b, 0644)
+// 	return base_url + file
+// }
 
 func GetFile(file File) []byte {
 	client := &http.Client{
@@ -82,7 +81,7 @@ func GetFile(file File) []byte {
 }
 
 func Chrisify(file string) []byte {
-	out, err := exec.Command(chrisify, "--haar", haar, file).Output()
+	out, err := exec.Command(chrisifyPath, "--haar", haarPath, file).Output()
 	if err != nil {
 		log.Fatalf("couldn't chrisify: %s", err)
 	}
