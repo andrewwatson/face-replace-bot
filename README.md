@@ -28,7 +28,27 @@ $ echo -n "actual token value" | base64
 YWN0dWFsIHRva2VuIHZhbHVl
 ```
 
-Take that value and substitute it into kubernetes-secrets-real.yaml file.  Then load it into the cluster:
+Take that value and substitute it into kubernetes-secrets-real.yaml file.
+
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: slack
+data:
+  token: YWN0dWFsIHRva2VuIHZhbHVl
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: environmental
+data:
+  aws_access_key_id: YWN0dWFsIGFjY2VzcyBrZXk=
+  aws_secret_access_key: YWN0dWFsIHNlY3JldCAga2V5
+
+```
+
+Then load it into the cluster:
 
 ```
 $ kubectl create -f kubernetes-secrets-real.yaml
@@ -50,3 +70,5 @@ the pods on the fly
 ```
 $ ROLL=1 ./build.sh
 ```
+
+## Up and Running
