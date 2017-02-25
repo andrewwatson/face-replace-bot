@@ -28,7 +28,7 @@ $ echo -n "actual token value" | base64
 YWN0dWFsIHRva2VuIHZhbHVl
 ```
 
-Take that value and substitute it into kubernetes-secrets-real.yaml file.
+Take that value and substitute it into kubernetes-secrets-real.yaml file.  These aren't my real secrets.
 
 ```
 apiVersion: v1
