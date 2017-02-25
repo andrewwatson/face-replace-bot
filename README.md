@@ -72,3 +72,13 @@ $ ROLL=1 ./build.sh
 ```
 
 ## Up and Running
+
+You can now see the kubernetes pods running in your cluster.  the -l option will limit the display
+to the new once we just created.
+
+```
+$ kubectl get pods -l run=replace-the-face
+NAME                                READY     STATUS    RESTARTS   AGE
+replace-the-face-1316715095-ldeew   1/1       Running   0          3h
+
+```
