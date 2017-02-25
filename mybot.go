@@ -3,17 +3,34 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/google/uuid"
 )
 
-var token string
-var chrisifyPath string
-var haarPath string
+var (
+	token        string
+	chrisifyPath string
+	haarPath     string
+
+	defaultRegion string
+	accessKeyID   string
+	secretKeyID   string
+	s3Bucket      string
+
+	sess *session.Session
+	svc  *s3.S3
+)
 
 // var base_path = "/var/www/chrisbot.zikes.me/"
 // var base_url = "http://chrisbot.zikes.me/"
@@ -25,27 +42,34 @@ func init() {
 	}
 
 	chrisifyPath = os.Getenv("CHRISIFY_PATH")
-
 	haarPath = os.Getenv("HAAR_FILE")
+
+	accessKeyID = os.Getenv("AWS_ACCESS_KEY_ID")
+	secretKeyID = os.Getenv("AWS_SECRET_ACCESS_KEY")
+
+	s3Bucket = os.Getenv("S3_BUCKET_NAME")
+
+	var err error
+	sess, err = session.NewSession(&aws.Config{
+		Region:      aws.String(defaultRegion),
+		Credentials: credentials.NewEnvCredentials(),
+	})
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	svc = s3.New(sess)
+
 }
 
 func main() {
 
-	// if len(os.Args) != 4 {
-	// 	fmt.Fprintf(os.Stderr, "usage: slackbot slack-bot-token /path/to/chrisify /path/to/haar\n")
-	// 	os.Exit(1)
-	// }
-	//
-	// token = os.Args[1]
-	// chrisify = os.Args[2]
-	// haar = os.Args[3]
-
-	// start a websocket-based Real Time API session
 	ws, id := slackConnect(token)
-	fmt.Println("slackbot ready, ^C exits")
+	fmt.Println("bot ready to replace faces")
 
 	for {
-		// read each incoming message
+
 		m, err := getMessage(ws)
 		if err != nil {
 			log.Fatal(err)
@@ -56,14 +80,31 @@ func main() {
 			go func(m Message) {
 				var channel string
 				json.Unmarshal(m.Channel, &channel)
-				// file := SaveTempFile(GetFile(m.File))
-				// chrisd := Chrisify(file)
-				// log.Printf("Uploading to %s", channel)
-				// Upload(chrisd, channel)
-				// url := SaveFile(chrisd)
+				file := SaveTempFile(GetFile(m.File))
+				chrisd, err := Chrisify(file)
+				if err != nil {
+					log.Printf("Error during Face Replace: %s", err.Error())
+				}
+
+				unique := uuid.New()
+
+				object, err := svc.PutObject(&s3.PutObjectInput{
+					Bucket:      aws.String(s3Bucket),
+					Key:         aws.String(unique.String()),
+					Body:        bytes.NewReader(chrisd),
+					ContentType: aws.String("image/png"),
+					ACL:         aws.String("public-read"),
+				})
+
+				if err != nil {
+					log.Printf("Error During Upload: %s", err.Error())
+				} else {
+					log.Printf("Object Created: %s", object)
+				}
+
 				postMessage(ws, map[string]string{
 					"type":    "message",
-					"text":    "https://avatars.slack-edge.com/2017-02-24/145511248880_386a6bad513462a96741_48.png",
+					"text":    "https://s3.amazonaws.com/makeandbuild-kenbot-results/" + unique.String(),
 					"channel": channel,
 				})
 
@@ -71,4 +112,7 @@ func main() {
 			}(m)
 		}
 	}
+
+	// log.Fatal(errors.New("We Exited the For Loop!"))
+
 }

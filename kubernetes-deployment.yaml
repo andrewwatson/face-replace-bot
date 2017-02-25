@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: replace-the-face
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: replace-the-face
+    spec:
+      imagePullSecrets:
+      - name: dockerhub
+      containers:
+      - name: botbrains
+        image: makeandbuildatl/kenbot:latest
+        imagePullPolicy: Always
+        env:
+          - name: AWS_REGION
+            value: us-east-1
+          - name: S3_BUCKET_NAME
+            value: makeandbuild-kenbot-results
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: environmental
+                key: aws_access_key_id
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: environmental
+                key: aws_secret_access_key
+          - name: SLACK_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: slack
+                key: token

@@ -80,10 +80,13 @@ func GetFile(file File) []byte {
 	return body
 }
 
-func Chrisify(file string) []byte {
-	out, err := exec.Command(chrisifyPath, "--haar", haarPath, file).Output()
+func Chrisify(file string) ([]byte, error) {
+	out, err := exec.Command("/go/bin/chrisify", "--haar", "/opt/facebot/haarcascade_frontalface_alt.xml", file).Output()
+
 	if err != nil {
-		log.Fatalf("couldn't chrisify: %s", err)
+		// log.Fatalf("couldn't chrisify: %s", err)
+		return nil, err
 	}
-	return out
+
+	return out, nil
 }
