@@ -3,8 +3,10 @@
 set -e
 
 DATE=`date +'%Y%m%d%H%M%S'`
-IMAGE=kenbot
+IMAGE=replacethefacebot
 TAG=$DATE
+# NOTE: you'll want to change this to your docker hub organization.  The odds of
+# you being in mine are pretty low...
 PUSH=makeandbuildatl
 
 echo "BUILDING DOCKER IMAGE $IMAGE:$TAG"

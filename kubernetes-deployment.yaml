@@ -13,13 +13,13 @@ spec:
       - name: dockerhub
       containers:
       - name: botbrains
-        image: makeandbuildatl/kenbot:latest
+        image: makeandbuildatl/replacethefacebot:latest
         imagePullPolicy: Always
         env:
           - name: AWS_REGION
             value: us-east-1
           - name: S3_BUCKET_NAME
-            value: makeandbuild-kenbot-results
+            value: facereplace-results
           - name: AWS_ACCESS_KEY_ID
             valueFrom:
               secretKeyRef:
